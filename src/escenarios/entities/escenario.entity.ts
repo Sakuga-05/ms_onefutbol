@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Localidad } from '../../localidades/entities/localidad.entity';
 import { Partido } from '../../partidos/entities/partido.entity';
+import { EscenarioTorneo } from '../../escenarios-torneos/entities/escenario-torneo.entity';
 
 @Entity('escenarios')
 export class Escenario {
@@ -48,5 +49,9 @@ export class Escenario {
   // Un escenario alberga muchos partidos
   @OneToMany(() => Partido, (partido) => partido.escenario)
   partidos?: Partido[];
+
+  // Relación N:M con Torneo mediante EscenarioTorneo (1:N)
+  @OneToMany(() => EscenarioTorneo, (et) => et.escenario)
+  escenariosTorneos?: EscenarioTorneo[];
 }
 

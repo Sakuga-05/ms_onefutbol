@@ -19,6 +19,16 @@ export class HabilidadesService {
     return HabilidadMapper.toResponseDtoList(await this.repository.find({ order: { id: 'ASC' } }));
   }
   async findOne(id: number): Promise<HabilidadResponseDto> { return HabilidadMapper.toResponseDto(await this.findHabilidad(id)); }
+  async findJugadores(id: number) {
+    await this.findHabilidad(id);
+    const jugadores = await this.customRepository.findJugadoresByHabilidad(id);
+    return {
+      habilidadId: id,
+      totalJugadores: jugadores.length,
+      jugadores,
+      mensaje: jugadores.length === 0 ? 'No hay jugadores con esta habilidad' : undefined,
+    };
+  }
   async update(id: number, dto: UpdateHabilidadDto): Promise<HabilidadResponseDto> {
     const habilidad = await this.findHabilidad(id);
     if (dto.nombre !== undefined) await this.validateName(dto.nombre, id);

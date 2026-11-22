@@ -10,6 +10,7 @@ import { JugadoresModule } from './jugadores/jugadores.module';
 import { PelotasModule } from './pelotas/pelotas.module';
 import { PosicionesEspacialesModule } from './posiciones-espaciales/posiciones-espaciales.module';
 import { AficionadosEquiposModule } from './aficionados-equipos/aficionados-equipos.module';
+import { ContratosModule } from './contratos/contratos.module';
 import { BoletosModule } from './boletos/boletos.module';
 import { DeportesModule } from './deportes/deportes.module';
 import { EquiposDeportesModule } from './equipos-deportes/equipos-deportes.module';
@@ -19,6 +20,13 @@ import { LocalidadesModule } from './localidades/localidades.module';
 import { MetodosPagoAficionadosModule } from './metodos-pago-aficionados/metodos-pago-aficionados.module';
 import { MetodosPagoModule } from './metodos-pago/metodos-pago.module';
 import { PartidosModule } from './partidos/partidos.module';
+
+import { EscenariosTorneosModule } from './escenarios-torneos/escenarios-torneos.module';
+import { FasesModule } from './fases/fases.module';
+import { FinalesModule } from './finales/finales.module';
+import { GruposModule } from './grupos/grupos.module';
+import { InscripcionesModule } from './inscripciones/inscripciones.module';
+import { TorneosModule } from './torneos/torneos.module';
 
 @Module({
   imports: [
@@ -52,9 +60,16 @@ import { PartidosModule } from './partidos/partidos.module';
     JugadoresModule,
     HabilidadesModule,
     HabilidadesJugadoresModule,
+    ContratosModule,
     PosicionesEspacialesModule,
     PelotasModule,
     AficionadosEquiposModule,
+    TorneosModule,
+    InscripcionesModule,
+    EscenariosTorneosModule,
+    FasesModule,
+    GruposModule,
+    FinalesModule,
   ],
 })
 export class AppModule {}

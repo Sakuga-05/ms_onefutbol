@@ -12,6 +12,7 @@ import { Escenario } from '../../escenarios/entities/escenario.entity';
 import { Apuesta } from '../../apuestas/entities/apuesta.entity';
 import { Anotacion } from '../../anotaciones/entities/anotacion.entity';
 import { Pelota } from '../../pelotas/entities/pelota.entity';
+import { Fase } from '../../fases/entities/fase.entity';
 
 @Entity('partidos')
 export class Partido {
@@ -26,6 +27,14 @@ export class Partido {
 
   @Column({ type: 'text', nullable: true })
   descripcion!: string | null;
+
+  // Pertenece a una Fase (N:1, partido n:1 con fase)
+  @ManyToOne(() => Fase, (fase) => fase.partidos, {
+    nullable: true,
+    onDelete: 'NO ACTION',
+  })
+  @JoinColumn({ name: 'fase_id' })
+  fase?: Fase | null;
 
   // Pertenece a un único Escenario (N:1)
   @ManyToOne(() => Escenario, (escenario) => escenario.partidos, {

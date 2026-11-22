@@ -31,6 +31,11 @@ export class DeportesController {
     return this.deportesService.findEquipos(id);
   }
 
+  @Get(':id/subdeportes')
+  findSubdeportes(@Param('id', ParseIntPipe) id: number) {
+    return this.deportesService.findSubdeportes(id);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.deportesService.findOne(id);

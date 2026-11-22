@@ -15,4 +15,16 @@ export class HabilidadesRepository {
     );
     return Boolean(row);
   }
+
+  async findJugadoresByHabilidad(id: number) {
+    return this.dataSource.query(
+      `SELECT hj.id AS relacion_id, hj.nivel, hj.fecha_registro,
+              j.id AS jugador_id, j.nombres, j.apellidos, j.identificacion, j.numero_camiseta, j.nacionalidad, j.activo
+       FROM habilidades_jugadores hj
+       INNER JOIN jugadores j ON hj.jugador_id = j.id
+       WHERE hj.habilidad_id = ?
+       ORDER BY hj.nivel DESC, j.apellidos ASC`,
+      [id],
+    );
+  }
 }

@@ -37,6 +37,11 @@ export class EquiposController {
     return this.equiposService.findDeportes(id);
   }
 
+  @Get(':id/jugadores')
+  findJugadores(@Param('id', ParseIntPipe) id: number) {
+    return this.equiposService.findJugadores(id);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.equiposService.findOne(id);

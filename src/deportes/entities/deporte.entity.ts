@@ -1,4 +1,5 @@
 import { EquipoDeporte } from '../../equipos-deportes/entities/equipo-deporte.entity';
+import { Torneo } from '../../torneos/entities/torneo.entity';
 import {
   Column,
   Entity,
@@ -44,4 +45,8 @@ export class Deporte {
 
   @OneToMany(() => EquipoDeporte, (equipoDeporte) => equipoDeporte.deporte)
   equiposDeportes?: EquipoDeporte[];
+
+  // Torneos organizados para este deporte (1:N)
+  @OneToMany(() => Torneo, (torneo) => torneo.deporte)
+  torneos?: Torneo[];
 }

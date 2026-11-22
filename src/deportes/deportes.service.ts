@@ -11,6 +11,7 @@ import { EquiposDeDeporteDto } from './dto/equipos-de-deporte.dto';
 import { CreateDeporteDto } from './dto/create-deporte.dto';
 import { DeporteResponseDto } from './dto/deporte-response.dto';
 import { UpdateDeporteDto } from './dto/update-deporte.dto';
+import { Torneo } from '../torneos/entities/torneo.entity';
 import { Deporte } from './entities/deporte.entity';
 import { DeporteMapper } from './mappers/deporte.mapper';
 import { DeportesRepository } from './repositories/deportes.repository';
@@ -22,6 +23,8 @@ export class DeportesService {
     private readonly deportesRepository: Repository<Deporte>,
     @InjectRepository(EquipoDeporte)
     private readonly equiposDeportesRepository: Repository<EquipoDeporte>,
+    @InjectRepository(Torneo)
+    private readonly torneosRepository: Repository<Torneo>,
     private readonly customDeportesRepository: DeportesRepository,
   ) {}
 
@@ -81,15 +84,25 @@ export class DeportesService {
     return DeporteMapper.toResponseDto(saved);
   }
 
+  async findSubdeportes(id: number): Promise<DeporteResponseDto[]> {
+    await this.findDeporte(id);
+    const subdeportes = await this.deportesRepository.find({
+      where: { deportePadre: { id } },
+      relations: { deportePadre: true, subdeportes: true },
+    });
+    return DeporteMapper.toResponseDtoList(subdeportes);
+  }
+
   async remove(id: number): Promise<{ message: string }> {
     const deporte = await this.findDeporte(id);
-    const [hasChildren, hasTeams] = await Promise.all([
+    const [hasChildren, hasTeams, hasTorneos] = await Promise.all([
       this.deportesRepository.existsBy({ deportePadre: { id } }),
       this.equiposDeportesRepository.existsBy({ deporte: { id } }),
+      this.torneosRepository.existsBy({ deporte: { id } }),
     ]);
-    if (hasChildren || hasTeams) {
+    if (hasChildren || hasTeams || hasTorneos) {
       throw new ConflictException(
-        'No se puede eliminar un deporte que tenga subdeportes o equipos asociados',
+        'No se puede eliminar un deporte que tenga subdeportes, equipos o torneos asociados',
       );
     }
     await this.deportesRepository.remove(deporte);
