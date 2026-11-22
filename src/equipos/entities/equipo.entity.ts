@@ -1,4 +1,5 @@
 import { EquipoDeporte } from '../../equipos-deportes/entities/equipo-deporte.entity';
+import { AficionadoEquipo } from '../../aficionados-equipos/entities/aficionado-equipo.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('equipos')
@@ -29,4 +30,10 @@ export class Equipo {
 
   @OneToMany(() => EquipoDeporte, (equipoDeporte) => equipoDeporte.equipo)
   deportes?: EquipoDeporte[];
+
+  @OneToMany(
+    () => AficionadoEquipo,
+    (aficionadoEquipo) => aficionadoEquipo.equipo,
+  )
+  aficionados?: AficionadoEquipo[];
 }

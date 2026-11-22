@@ -4,11 +4,14 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Boleto } from '../../boletos/entities/boleto.entity';
 import { Escenario } from '../../escenarios/entities/escenario.entity';
 import { Apuesta } from '../../apuestas/entities/apuesta.entity';
+import { Anotacion } from '../../anotaciones/entities/anotacion.entity';
+import { Pelota } from '../../pelotas/entities/pelota.entity';
 
 @Entity('partidos')
 export class Partido {
@@ -39,5 +42,10 @@ export class Partido {
   // Un Partido puede recibir muchas Apuestas (1:N)
   @OneToMany(() => Apuesta, (apuesta) => apuesta.partido)
   apuestas?: Apuesta[];
-}
 
+  @OneToMany(() => Anotacion, (anotacion) => anotacion.partido)
+  anotaciones?: Anotacion[];
+
+  @OneToOne(() => Pelota, (pelota) => pelota.partido)
+  pelota?: Pelota;
+}

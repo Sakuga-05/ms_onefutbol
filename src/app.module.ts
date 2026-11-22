@@ -3,6 +3,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AficionadosModule } from './aficionados/aficionados.module';
 import { ApuestasModule } from './apuestas/apuestas.module';
+import { AnotacionesModule } from './anotaciones/anotaciones.module';
+import { HabilidadesModule } from './habilidades/habilidades.module';
+import { HabilidadesJugadoresModule } from './habilidades-jugadores/habilidades-jugadores.module';
+import { JugadoresModule } from './jugadores/jugadores.module';
+import { PelotasModule } from './pelotas/pelotas.module';
+import { PosicionesEspacialesModule } from './posiciones-espaciales/posiciones-espaciales.module';
+import { AficionadosEquiposModule } from './aficionados-equipos/aficionados-equipos.module';
 import { BoletosModule } from './boletos/boletos.module';
 import { DeportesModule } from './deportes/deportes.module';
 import { EquiposDeportesModule } from './equipos-deportes/equipos-deportes.module';
@@ -41,6 +48,13 @@ import { PartidosModule } from './partidos/partidos.module';
     MetodosPagoModule,
     MetodosPagoAficionadosModule,
     ApuestasModule,
+    AnotacionesModule,
+    JugadoresModule,
+    HabilidadesModule,
+    HabilidadesJugadoresModule,
+    PosicionesEspacialesModule,
+    PelotasModule,
+    AficionadosEquiposModule,
   ],
 })
 export class AppModule {}

@@ -7,6 +7,7 @@ import {
 import { Boleto } from '../../boletos/entities/boleto.entity';
 import { MetodoPagoAficionado } from '../../metodos-pago-aficionados/entities/metodo-pago-aficionado.entity';
 import { Apuesta } from '../../apuestas/entities/apuesta.entity';
+import { AficionadoEquipo } from '../../aficionados-equipos/entities/aficionado-equipo.entity';
 
 @Entity('aficionados')
 export class Aficionado {
@@ -48,5 +49,10 @@ export class Aficionado {
   // Un Aficionado puede realizar varias Apuestas (1:N)
   @OneToMany(() => Apuesta, (apuesta) => apuesta.aficionado)
   apuestas?: Apuesta[];
-}
 
+  @OneToMany(
+    () => AficionadoEquipo,
+    (aficionadoEquipo) => aficionadoEquipo.aficionado,
+  )
+  equipos?: AficionadoEquipo[];
+}
