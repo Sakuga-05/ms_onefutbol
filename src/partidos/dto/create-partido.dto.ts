@@ -6,6 +6,7 @@ import {
   IsPositive,
   IsString,
   MaxLength,
+  Min,
 } from 'class-validator';
 
 export class CreatePartidoDto {
@@ -25,5 +26,26 @@ export class CreatePartidoDto {
   @IsInt()
   @IsPositive()
   escenarioId!: number;
-}
 
+  @IsInt()
+  @IsPositive()
+  faseId!: number;
+
+  @IsInt()
+  @IsPositive()
+  equipoLocalId!: number;
+
+  @IsInt()
+  @IsPositive()
+  equipoVisitanteId!: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  golesLocal?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  golesVisitante?: number;
+}

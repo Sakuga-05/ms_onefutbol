@@ -3,17 +3,27 @@ import { PartidoResponseDto } from '../dto/partido-response.dto';
 import { UpdatePartidoDto } from '../dto/update-partido.dto';
 import { Partido } from '../entities/partido.entity';
 import { Escenario } from '../../escenarios/entities/escenario.entity';
+import { Equipo } from '../../equipos/entities/equipo.entity';
+import { Fase } from '../../fases/entities/fase.entity';
 
 export class PartidoMapper {
   static toEntity(
     dto: CreatePartidoDto,
     escenario: Escenario,
+    fase: Fase,
+    equipoLocal: Equipo,
+    equipoVisitante: Equipo,
   ): Partial<Partido> {
     return {
       fechaHora: new Date(dto.fechaHora),
       estado: dto.estado ? dto.estado.trim().toUpperCase() : 'PROGRAMADO',
       descripcion: dto.descripcion?.trim() ?? null,
       escenario,
+      fase,
+      equipoLocal,
+      equipoVisitante,
+      golesLocal: dto.golesLocal ?? null,
+      golesVisitante: dto.golesVisitante ?? null,
     };
   }
 
@@ -21,6 +31,9 @@ export class PartidoMapper {
     entity: Partido,
     dto: UpdatePartidoDto,
     escenario?: Escenario,
+    fase?: Fase,
+    equipoLocal?: Equipo,
+    equipoVisitante?: Equipo,
   ): Partido {
     if (dto.fechaHora !== undefined) {
       entity.fechaHora = new Date(dto.fechaHora);
@@ -32,6 +45,11 @@ export class PartidoMapper {
       entity.descripcion = dto.descripcion ? dto.descripcion.trim() : null;
     }
     if (escenario !== undefined) entity.escenario = escenario;
+    if (fase !== undefined) entity.fase = fase;
+    if (equipoLocal !== undefined) entity.equipoLocal = equipoLocal;
+    if (equipoVisitante !== undefined) entity.equipoVisitante = equipoVisitante;
+    if (dto.golesLocal !== undefined) entity.golesLocal = dto.golesLocal;
+    if (dto.golesVisitante !== undefined) entity.golesVisitante = dto.golesVisitante;
     return entity;
   }
 
@@ -45,6 +63,11 @@ export class PartidoMapper {
       estado: entity.estado,
       descripcion: entity.descripcion,
       escenarioId: entity.escenario?.id,
+      faseId: entity.fase?.id ?? null,
+      equipoLocalId: entity.equipoLocal?.id ?? null,
+      equipoVisitanteId: entity.equipoVisitante?.id ?? null,
+      golesLocal: entity.golesLocal,
+      golesVisitante: entity.golesVisitante,
     };
   }
 
@@ -52,4 +75,3 @@ export class PartidoMapper {
     return entities.map((entity) => this.toResponseDto(entity));
   }
 }
-

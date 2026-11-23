@@ -12,6 +12,8 @@ import { UpdatePartidoDto } from './dto/update-partido.dto';
 import { Partido } from './entities/partido.entity';
 import { PartidoMapper } from './mappers/partido.mapper';
 import { PartidosRepository } from './repositories/partidos.repository';
+import { Equipo } from '../equipos/entities/equipo.entity';
+import { Fase } from '../fases/entities/fase.entity';
 
 @Injectable()
 export class PartidosService {
@@ -20,21 +22,34 @@ export class PartidosService {
     private readonly partidosRepository: Repository<Partido>,
     @InjectRepository(Escenario)
     private readonly escenariosRepository: Repository<Escenario>,
+    @InjectRepository(Equipo)
+    private readonly equiposRepository: Repository<Equipo>,
+    @InjectRepository(Fase)
+    private readonly fasesRepository: Repository<Fase>,
     private readonly customPartidosRepository: PartidosRepository,
   ) {}
 
   async create(dto: CreatePartidoDto): Promise<PartidoResponseDto> {
     const escenario = await this.findEscenario(dto.escenarioId);
+    const fase = await this.findFase(dto.faseId);
+    if (dto.equipoLocalId === dto.equipoVisitanteId) {
+      throw new ConflictException('Un equipo no puede competir contra sí mismo');
+    }
+    const equipoLocal = await this.findEquipo(dto.equipoLocalId);
+    const equipoVisitante = await this.findEquipo(dto.equipoVisitanteId);
+    if (!equipoLocal.activo || !equipoVisitante.activo) {
+      throw new ConflictException('Los equipos participantes deben estar activos');
+    }
 
     const saved = await this.partidosRepository.save(
-      PartidoMapper.toEntity(dto, escenario),
+      PartidoMapper.toEntity(dto, escenario, fase, equipoLocal, equipoVisitante),
     );
     return PartidoMapper.toResponseDto(saved);
   }
 
   async findAll(): Promise<PartidoResponseDto[]> {
     const partidos = await this.partidosRepository.find({
-      relations: { escenario: true },
+      relations: { escenario: true, fase: true, equipoLocal: true, equipoVisitante: true },
       order: { fechaHora: 'ASC' },
     });
     return PartidoMapper.toResponseDtoList(partidos);
@@ -63,9 +78,20 @@ export class PartidosService {
     if (dto.escenarioId !== undefined) {
       escenario = await this.findEscenario(dto.escenarioId);
     }
+    let fase: Fase | undefined;
+    if (dto.faseId !== undefined) fase = await this.findFase(dto.faseId);
+    let equipoLocal: Equipo | undefined;
+    if (dto.equipoLocalId !== undefined) equipoLocal = await this.findEquipo(dto.equipoLocalId);
+    let equipoVisitante: Equipo | undefined;
+    if (dto.equipoVisitanteId !== undefined) equipoVisitante = await this.findEquipo(dto.equipoVisitanteId);
+    const localId = equipoLocal?.id ?? partido.equipoLocal?.id;
+    const visitanteId = equipoVisitante?.id ?? partido.equipoVisitante?.id;
+    if (localId && visitanteId && localId === visitanteId) {
+      throw new ConflictException('Un equipo no puede competir contra sí mismo');
+    }
 
     const saved = await this.partidosRepository.save(
-      PartidoMapper.mergeEntity(partido, dto, escenario),
+      PartidoMapper.mergeEntity(partido, dto, escenario, fase, equipoLocal, equipoVisitante),
     );
     return PartidoMapper.toResponseDto(saved);
   }
@@ -86,7 +112,7 @@ export class PartidosService {
   private async findPartido(id: number): Promise<Partido> {
     const partido = await this.partidosRepository.findOne({
       where: { id },
-      relations: { escenario: true },
+      relations: { escenario: true, fase: true, equipoLocal: true, equipoVisitante: true },
     });
     if (!partido) {
       throw new NotFoundException(`No se encontró el partido con id ${id}`);
@@ -101,5 +127,16 @@ export class PartidosService {
     }
     return escenario;
   }
-}
 
+  private async findFase(id: number): Promise<Fase> {
+    const fase = await this.fasesRepository.findOneBy({ id });
+    if (!fase) throw new NotFoundException(`No se encontró la fase con id ${id}`);
+    return fase;
+  }
+
+  private async findEquipo(id: number): Promise<Equipo> {
+    const equipo = await this.equiposRepository.findOneBy({ id });
+    if (!equipo) throw new NotFoundException(`No se encontró el equipo con id ${id}`);
+    return equipo;
+  }
+}

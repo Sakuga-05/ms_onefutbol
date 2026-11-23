@@ -13,6 +13,7 @@ import { Apuesta } from '../../apuestas/entities/apuesta.entity';
 import { Anotacion } from '../../anotaciones/entities/anotacion.entity';
 import { Pelota } from '../../pelotas/entities/pelota.entity';
 import { Fase } from '../../fases/entities/fase.entity';
+import { Equipo } from '../../equipos/entities/equipo.entity';
 
 @Entity('partidos')
 export class Partido {
@@ -43,6 +44,20 @@ export class Partido {
   })
   @JoinColumn({ name: 'escenario_id' })
   escenario!: Escenario;
+
+  @ManyToOne(() => Equipo, { nullable: true, onDelete: 'NO ACTION' })
+  @JoinColumn({ name: 'equipo_local_id' })
+  equipoLocal!: Equipo | null;
+
+  @ManyToOne(() => Equipo, { nullable: true, onDelete: 'NO ACTION' })
+  @JoinColumn({ name: 'equipo_visitante_id' })
+  equipoVisitante!: Equipo | null;
+
+  @Column({ name: 'goles_local', type: 'int', nullable: true })
+  golesLocal!: number | null;
+
+  @Column({ name: 'goles_visitante', type: 'int', nullable: true })
+  golesVisitante!: number | null;
 
   // Un Partido puede tener muchos Boletos (1:N)
   @OneToMany(() => Boleto, (boleto) => boleto.partido)

@@ -18,13 +18,13 @@ export class PartidosRepository {
   async findById(id: number): Promise<Partido | null> {
     return this.repository.findOne({
       where: { id },
-      relations: { escenario: true },
+      relations: { escenario: true, fase: true, equipoLocal: true, equipoVisitante: true },
     });
   }
 
   async findAll(): Promise<Partido[]> {
     return this.repository.find({
-      relations: { escenario: true },
+      relations: { escenario: true, fase: true, equipoLocal: true, equipoVisitante: true },
       order: { fechaHora: 'ASC' },
     });
   }
@@ -104,4 +104,3 @@ export class PartidosRepository {
     return Boolean(row);
   }
 }
-
