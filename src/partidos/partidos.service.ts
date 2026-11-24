@@ -14,6 +14,7 @@ import { PartidoMapper } from './mappers/partido.mapper';
 import { PartidosRepository } from './repositories/partidos.repository';
 import { Equipo } from '../equipos/entities/equipo.entity';
 import { Fase } from '../fases/entities/fase.entity';
+import { NotificationsService } from '../gateways/notifications/notifications.service';
 
 @Injectable()
 export class PartidosService {
@@ -27,6 +28,7 @@ export class PartidosService {
     @InjectRepository(Fase)
     private readonly fasesRepository: Repository<Fase>,
     private readonly customPartidosRepository: PartidosRepository,
+    private readonly notifications: NotificationsService,
   ) {}
 
   async create(dto: CreatePartidoDto): Promise<PartidoResponseDto> {
@@ -40,10 +42,20 @@ export class PartidosService {
     if (!equipoLocal.activo || !equipoVisitante.activo) {
       throw new ConflictException('Los equipos participantes deben estar activos');
     }
+    this.validateFinishedResult(
+      dto.estado ?? 'PROGRAMADO',
+      dto.golesLocal,
+      dto.golesVisitante,
+      equipoLocal,
+      equipoVisitante,
+    );
 
     const saved = await this.partidosRepository.save(
       PartidoMapper.toEntity(dto, escenario, fase, equipoLocal, equipoVisitante),
     );
+    if (this.hasFinalResult(saved)) {
+      await this.notifications.notifyMatchFinished(saved);
+    }
     return PartidoMapper.toResponseDto(saved);
   }
 
@@ -73,6 +85,7 @@ export class PartidosService {
 
   async update(id: number, dto: UpdatePartidoDto): Promise<PartidoResponseDto> {
     const partido = await this.findPartido(id);
+    const hadFinalResult = this.hasFinalResult(partido);
     let escenario: Escenario | undefined = undefined;
 
     if (dto.escenarioId !== undefined) {
@@ -98,10 +111,28 @@ export class PartidosService {
     ) {
       throw new ConflictException('Los equipos participantes deben estar activos');
     }
+    if (
+      dto.estado !== undefined ||
+      dto.golesLocal !== undefined ||
+      dto.golesVisitante !== undefined
+    ) {
+      this.validateFinishedResult(
+        dto.estado ?? partido.estado,
+        dto.golesLocal !== undefined ? dto.golesLocal : partido.golesLocal,
+        dto.golesVisitante !== undefined
+          ? dto.golesVisitante
+          : partido.golesVisitante,
+        equipoLocalParticipante ?? null,
+        equipoVisitanteParticipante ?? null,
+      );
+    }
 
     const saved = await this.partidosRepository.save(
       PartidoMapper.mergeEntity(partido, dto, escenario, fase, equipoLocal, equipoVisitante),
     );
+    if (!hadFinalResult && this.hasFinalResult(saved)) {
+      await this.notifications.notifyMatchFinished(saved);
+    }
     return PartidoMapper.toResponseDto(saved);
   }
 
@@ -147,5 +178,45 @@ export class PartidosService {
     const equipo = await this.equiposRepository.findOneBy({ id });
     if (!equipo) throw new NotFoundException(`No se encontró el equipo con id ${id}`);
     return equipo;
+  }
+
+  private validateFinishedResult(
+    status: string,
+    homeGoals: number | null | undefined,
+    awayGoals: number | null | undefined,
+    homeTeam: Equipo | null,
+    awayTeam: Equipo | null,
+  ): void {
+    if (!this.isFinishedStatus(status)) {
+      return;
+    }
+    if (
+      homeGoals === null ||
+      homeGoals === undefined ||
+      awayGoals === null ||
+      awayGoals === undefined ||
+      !homeTeam ||
+      !awayTeam
+    ) {
+      throw new ConflictException(
+        'Para finalizar un partido debes registrar ambos equipos y sus goles',
+      );
+    }
+  }
+
+  private hasFinalResult(partido: Partido): boolean {
+    return (
+      this.isFinishedStatus(partido.estado) &&
+      partido.golesLocal !== null &&
+      partido.golesLocal !== undefined &&
+      partido.golesVisitante !== null &&
+      partido.golesVisitante !== undefined &&
+      Boolean(partido.equipoLocal) &&
+      Boolean(partido.equipoVisitante)
+    );
+  }
+
+  private isFinishedStatus(status: string): boolean {
+    return ['FINALIZADO', 'TERMINADO'].includes(status.trim().toUpperCase());
   }
 }

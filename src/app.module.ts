@@ -27,6 +27,7 @@ import { FinalesModule } from './finales/finales.module';
 import { GruposModule } from './grupos/grupos.module';
 import { InscripcionesModule } from './inscripciones/inscripciones.module';
 import { TorneosModule } from './torneos/torneos.module';
+import { NotificationsModule } from './gateways/notifications/notifications.module';
 
 @Module({
   imports: [
@@ -67,6 +68,7 @@ import { TorneosModule } from './torneos/torneos.module';
     TorneosModule,
     InscripcionesModule,
     EscenariosTorneosModule,
+    NotificationsModule,
     FasesModule,
     GruposModule,
     FinalesModule,
