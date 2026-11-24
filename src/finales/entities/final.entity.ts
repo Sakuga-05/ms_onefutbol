@@ -2,10 +2,13 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Fase } from '../../fases/entities/fase.entity';
+import { Equipo } from '../../equipos/entities/equipo.entity';
 
 @Entity('finales')
 export class Final {
@@ -37,4 +40,12 @@ export class Final {
   })
   @JoinColumn({ name: 'fase_id' })
   fase!: Fase;
+
+  @ManyToMany(() => Equipo)
+  @JoinTable({
+    name: 'finales_equipos',
+    joinColumn: { name: 'final_id', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'equipo_id', referencedColumnName: 'id' },
+  })
+  equipos!: Equipo[];
 }

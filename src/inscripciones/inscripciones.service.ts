@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -32,6 +33,9 @@ export class InscripcionesService {
       this.findTorneo(dto.torneoId),
       this.findEquipo(dto.equipoId),
     ]);
+    this.validateEquipoActivo(equipo);
+    this.validateTorneoAbiertoYFecha(torneo, dto.fechaInscripcion);
+    await this.validateEquipoEnDeporteDelTorneo(torneo.id, equipo.id);
     await this.validateUniqueAssociation(torneo.id, equipo.id);
 
     const saved = await this.inscripcionesRepository.save(
@@ -68,7 +72,23 @@ export class InscripcionesService {
     const currentTorneoId = torneo ? torneo.id : inscripcion.torneo.id;
     const currentEquipoId = equipo ? equipo.id : inscripcion.equipo.id;
 
+    if (
+      dto.torneoId !== undefined ||
+      dto.equipoId !== undefined ||
+      dto.fechaInscripcion !== undefined
+    ) {
+      this.validateEquipoActivo(equipo ?? inscripcion.equipo);
+      this.validateTorneoAbiertoYFecha(
+        torneo ?? inscripcion.torneo,
+        dto.fechaInscripcion ?? inscripcion.fechaInscripcion,
+      );
+    }
+
     if (dto.torneoId !== undefined || dto.equipoId !== undefined) {
+      await this.validateEquipoEnDeporteDelTorneo(
+        currentTorneoId,
+        currentEquipoId,
+      );
       await this.validateUniqueAssociation(currentTorneoId, currentEquipoId, id);
     }
 
@@ -108,6 +128,54 @@ export class InscripcionesService {
   private async validateUniqueAssociation(torneoId: number, equipoId: number, excludeId?: number): Promise<void> {
     if (await this.customInscripcionesRepository.existsByTorneoEquipo(torneoId, equipoId, excludeId)) {
       throw new ConflictException('El equipo ya se encuentra inscrito en este torneo');
+    }
+  }
+
+  private async validateEquipoEnDeporteDelTorneo(
+    torneoId: number,
+    equipoId: number,
+  ): Promise<void> {
+    if (
+      !(await this.customInscripcionesRepository.equipoParticipaEnDeporteDelTorneo(
+        torneoId,
+        equipoId,
+      ))
+    ) {
+      throw new BadRequestException(
+        'El equipo no está inscrito en el deporte que se realiza en este torneo',
+      );
+    }
+  }
+
+  private validateEquipoActivo(equipo: Equipo): void {
+    if (!equipo.activo) {
+      throw new ConflictException(
+        `No se puede inscribir al equipo "${equipo.nombre}" porque está inactivo`,
+      );
+    }
+  }
+
+  private validateTorneoAbiertoYFecha(
+    torneo: Torneo,
+    fechaInscripcion: string,
+  ): void {
+    if (!torneo.activo) {
+      throw new BadRequestException(
+        'El torneo está cerrado para inscripciones',
+      );
+    }
+
+    const fechaRegistro = fechaInscripcion.slice(0, 10);
+    const fechaInicio = torneo.fechaInicio.slice(0, 10);
+    const fechaFin = torneo.fechaFin?.slice(0, 10);
+
+    if (
+      fechaRegistro > fechaInicio ||
+      (fechaFin !== undefined && fechaRegistro > fechaFin)
+    ) {
+      throw new BadRequestException(
+        'La fecha de inscripción no puede ser posterior al inicio o finalización del torneo',
+      );
     }
   }
 

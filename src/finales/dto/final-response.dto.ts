@@ -7,4 +7,5 @@ export class FinalResponseDto {
   trofeoNombre!: string;
   reglasEspecificas!: string | null;
   faseId!: number;
+  equipoIds!: number[];
 }

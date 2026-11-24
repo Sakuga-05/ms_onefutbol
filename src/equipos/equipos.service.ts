@@ -76,6 +76,16 @@ export class EquiposService {
 
   async update(id: number, dto: UpdateEquipoDto, file?: UploadedShield): Promise<EquipoResponseDto> {
     const equipo = await this.findEquipo(id);
+    if (
+      dto.activo === false &&
+      equipo.activo &&
+      await this.customEquiposRepository.hasParticipacionCompetitiva(id)
+    ) {
+      throw new ConflictException(
+        `No se puede desactivar el equipo #${id} porque participa en torneos, fases o partidos`,
+      );
+    }
+
     const saved = await this.equiposRepository.save(
       EquipoMapper.mergeEntity(
         equipo,
@@ -88,6 +98,14 @@ export class EquiposService {
 
   async remove(id: number): Promise<{ message: string }> {
     const equipo = await this.findEquipo(id);
+    if (
+      await this.customEquiposRepository.hasInscripcionEnTorneoIniciado(id)
+    ) {
+      throw new ConflictException(
+        `No se puede eliminar el equipo #${id}: está inscrito en un torneo que ya comenzó`,
+      );
+    }
+
     const { hasDeps, reason } = await this.customEquiposRepository.hasDependencies(id);
     if (hasDeps) {
       throw new ConflictException(

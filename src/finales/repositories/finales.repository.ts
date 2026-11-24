@@ -53,4 +53,22 @@ export class FinalesRepository {
     );
     return Boolean(row);
   }
+
+  async hasDependencies(id: number): Promise<boolean> {
+    const [equipos, partidos] = await Promise.all([
+      this.dataSource.query(
+        'SELECT 1 FROM finales_equipos WHERE final_id = ? LIMIT 1',
+        [id],
+      ),
+      this.dataSource.query(
+        `SELECT 1
+         FROM partidos p
+         INNER JOIN finales f ON f.fase_id = p.fase_id
+         WHERE f.id = ?
+         LIMIT 1`,
+        [id],
+      ),
+    ]);
+    return equipos.length > 0 || partidos.length > 0;
+  }
 }

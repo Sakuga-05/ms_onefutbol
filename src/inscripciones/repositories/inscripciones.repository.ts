@@ -49,6 +49,21 @@ export class InscripcionesRepository {
     return Boolean(row);
   }
 
+  async equipoParticipaEnDeporteDelTorneo(
+    torneoId: number,
+    equipoId: number,
+  ): Promise<boolean> {
+    const [row] = await this.dataSource.query(
+      `SELECT 1
+       FROM equipos_deportes ed
+       INNER JOIN torneos t ON t.deporte_id = ed.deporte_id
+       WHERE t.id = ? AND ed.equipo_id = ?
+       LIMIT 1`,
+      [torneoId, equipoId],
+    );
+    return Boolean(row);
+  }
+
   async existsByNumeroRegistro(numeroRegistro: string, excludeId?: number): Promise<boolean> {
     const [row] = await this.dataSource.query(
       `SELECT 1 FROM inscripciones

@@ -39,6 +39,23 @@ export class FasesRepository {
     return (result.affected ?? 0) > 0;
   }
 
+  async existsByTorneoAndTipo(
+    torneoId: number,
+    tipo: string,
+    excludeId?: number,
+  ): Promise<boolean> {
+    const [row] = await this.dataSource.query(
+      `SELECT 1
+       FROM fases
+       WHERE torneo_id = ?
+         AND UPPER(TRIM(tipo)) = ?
+         AND NOT (id <=> ?)
+       LIMIT 1`,
+      [torneoId, tipo, excludeId ?? null],
+    );
+    return Boolean(row);
+  }
+
   async findWithPartidos(id: number): Promise<Fase | null> {
     return this.repository.findOne({
       where: { id },

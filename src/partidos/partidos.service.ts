@@ -89,6 +89,15 @@ export class PartidosService {
     if (localId && visitanteId && localId === visitanteId) {
       throw new ConflictException('Un equipo no puede competir contra sí mismo');
     }
+    const equipoLocalParticipante = equipoLocal ?? partido.equipoLocal;
+    const equipoVisitanteParticipante =
+      equipoVisitante ?? partido.equipoVisitante;
+    if (
+      equipoLocalParticipante && !equipoLocalParticipante.activo ||
+      equipoVisitanteParticipante && !equipoVisitanteParticipante.activo
+    ) {
+      throw new ConflictException('Los equipos participantes deben estar activos');
+    }
 
     const saved = await this.partidosRepository.save(
       PartidoMapper.mergeEntity(partido, dto, escenario, fase, equipoLocal, equipoVisitante),

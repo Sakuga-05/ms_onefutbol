@@ -1,4 +1,6 @@
 import {
+  ArrayUnique,
+  IsArray,
   IsBoolean,
   IsInt,
   IsNotEmpty,
@@ -25,4 +27,11 @@ export class CreateGrupoDto {
   @IsInt()
   @IsPositive()
   faseId!: number;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayUnique()
+  @IsInt({ each: true })
+  @IsPositive({ each: true })
+  equipoIds?: number[];
 }

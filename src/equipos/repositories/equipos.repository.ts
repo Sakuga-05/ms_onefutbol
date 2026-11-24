@@ -6,6 +6,34 @@ import { DataSource } from 'typeorm';
 export class EquiposRepository {
   constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
+  async hasParticipacionCompetitiva(equipoId: number): Promise<boolean> {
+    const [row] = await this.dataSource.query(
+      `SELECT 1 FROM inscripciones WHERE equipo_id = ?
+       UNION ALL
+       SELECT 1 FROM equipos WHERE id = ? AND grupo_id IS NOT NULL
+       UNION ALL
+       SELECT 1 FROM finales_equipos WHERE equipo_id = ?
+       UNION ALL
+       SELECT 1 FROM partidos
+       WHERE equipo_local_id = ? OR equipo_visitante_id = ?
+       LIMIT 1`,
+      [equipoId, equipoId, equipoId, equipoId, equipoId],
+    );
+    return Boolean(row);
+  }
+
+  async hasInscripcionEnTorneoIniciado(equipoId: number): Promise<boolean> {
+    const [row] = await this.dataSource.query(
+      `SELECT 1
+       FROM inscripciones i
+       INNER JOIN torneos t ON t.id = i.torneo_id
+       WHERE i.equipo_id = ? AND t.fecha_inicio <= CURDATE()
+       LIMIT 1`,
+      [equipoId],
+    );
+    return Boolean(row);
+  }
+
   async hasDependencies(
     id: number,
   ): Promise<{ hasDeps: boolean; reason?: string }> {

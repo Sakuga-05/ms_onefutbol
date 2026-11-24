@@ -25,6 +25,8 @@ export class FasesService {
 
   async create(dto: CreateFaseDto): Promise<FaseResponseDto> {
     const torneo = await this.findTorneo(dto.torneoId);
+    const tipo = dto.tipo ? dto.tipo.trim().toUpperCase() : 'GRUPOS';
+    await this.validateUniqueTipo(torneo.id, tipo);
     const saved = await this.fasesRepository.save(FaseMapper.toEntity(dto, torneo));
     return FaseMapper.toResponseDto(saved);
   }
@@ -65,6 +67,13 @@ export class FasesService {
     if (dto.torneoId !== undefined) {
       torneo = await this.findTorneo(dto.torneoId);
     }
+    if (dto.tipo !== undefined || torneo !== undefined) {
+      const torneoId = torneo?.id ?? fase.torneo.id;
+      const tipo = dto.tipo !== undefined
+        ? dto.tipo.trim().toUpperCase()
+        : fase.tipo;
+      await this.validateUniqueTipo(torneoId, tipo, id);
+    }
     const saved = await this.fasesRepository.save(
       FaseMapper.mergeEntity(fase, dto, torneo),
     );
@@ -95,5 +104,23 @@ export class FasesService {
     const torneo = await this.torneosRepository.findOneBy({ id });
     if (!torneo) throw new NotFoundException(`No se encontró el torneo con id ${id}`);
     return torneo;
+  }
+
+  private async validateUniqueTipo(
+    torneoId: number,
+    tipo: string,
+    excludeId?: number,
+  ): Promise<void> {
+    if (
+      await this.customFasesRepository.existsByTorneoAndTipo(
+        torneoId,
+        tipo,
+        excludeId,
+      )
+    ) {
+      throw new ConflictException(
+        `El torneo ya tiene asignada una fase de tipo "${tipo}"`,
+      );
+    }
   }
 }

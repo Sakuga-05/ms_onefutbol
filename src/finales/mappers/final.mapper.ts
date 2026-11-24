@@ -2,10 +2,11 @@ import { CreateFinalDto } from '../dto/create-final.dto';
 import { FinalResponseDto } from '../dto/final-response.dto';
 import { UpdateFinalDto } from '../dto/update-final.dto';
 import { Final } from '../entities/final.entity';
+import { Equipo } from '../../equipos/entities/equipo.entity';
 import { Fase } from '../../fases/entities/fase.entity';
 
 export class FinalMapper {
-  static toEntity(dto: CreateFinalDto, fase: Fase): Partial<Final> {
+  static toEntity(dto: CreateFinalDto, fase: Fase, equipos: Equipo[] = []): Partial<Final> {
     return {
       premioCampeon: dto.premioCampeon ?? 0,
       premioSubcampeon: dto.premioSubcampeon ?? 0,
@@ -14,10 +15,11 @@ export class FinalMapper {
       trofeoNombre: dto.trofeoNombre.trim(),
       reglasEspecificas: dto.reglasEspecificas?.trim() ?? null,
       fase,
+      equipos,
     };
   }
 
-  static mergeEntity(entity: Final, dto: UpdateFinalDto, fase?: Fase): Final {
+  static mergeEntity(entity: Final, dto: UpdateFinalDto, fase?: Fase, equipos?: Equipo[]): Final {
     if (dto.premioCampeon !== undefined) entity.premioCampeon = dto.premioCampeon;
     if (dto.premioSubcampeon !== undefined) entity.premioSubcampeon = dto.premioSubcampeon;
     if (dto.tiempoExtra !== undefined) entity.tiempoExtra = dto.tiempoExtra;
@@ -27,6 +29,7 @@ export class FinalMapper {
       entity.reglasEspecificas = dto.reglasEspecificas ? dto.reglasEspecificas.trim() : null;
     }
     if (fase !== undefined) entity.fase = fase;
+    if (equipos !== undefined) entity.equipos = equipos;
     return entity;
   }
 
@@ -40,6 +43,7 @@ export class FinalMapper {
       trofeoNombre: entity.trofeoNombre,
       reglasEspecificas: entity.reglasEspecificas,
       faseId: entity.fase?.id,
+      equipoIds: entity.equipos?.map((equipo) => equipo.id) ?? [],
     };
   }
 
