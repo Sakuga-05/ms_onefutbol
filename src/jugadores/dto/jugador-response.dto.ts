@@ -2,8 +2,8 @@ export class JugadorResponseDto {
   id!: number;
   nombres!: string;
   apellidos!: string;
-  identificacion!: string | null;
+  identificacion!: string;
   numeroCamiseta!: number;
-  nacionalidad!: string | null;
+  nacionalidad!: string;
   activo!: boolean;
 }

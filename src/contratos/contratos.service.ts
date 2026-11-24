@@ -34,15 +34,10 @@ export class ContratosService {
     ]);
 
     if (dto.activo !== false) {
-      const hasActive = await this.customRepository.existsActiveContract(
+      await this.validateNoActiveContractOverlap(
         dto.jugadorId,
-        dto.equipoId,
+        dto.fechaInicio,
       );
-      if (hasActive) {
-        throw new ConflictException(
-          'El jugador ya cuenta con un contrato activo en este equipo',
-        );
-      }
     }
 
     const saved = await this.contratosRepository.save(
@@ -80,20 +75,14 @@ export class ContratosService {
     }
 
     const finalJugadorId = jugador?.id ?? contrato.jugador.id;
-    const finalEquipoId = equipo?.id ?? contrato.equipo.id;
     const finalActivo = dto.activo !== undefined ? dto.activo : contrato.activo;
 
     if (finalActivo) {
-      const hasActive = await this.customRepository.existsActiveContract(
+      await this.validateNoActiveContractOverlap(
         finalJugadorId,
-        finalEquipoId,
+        fechaInicio,
         contrato.id,
       );
-      if (hasActive) {
-        throw new ConflictException(
-          'El jugador ya cuenta con un contrato activo en este equipo',
-        );
-      }
     }
 
     const saved = await this.contratosRepository.save(
@@ -157,6 +146,32 @@ export class ContratosService {
       throw new NotFoundException(`No se encontró el equipo con id ${id}`);
     }
     return equipo;
+  }
+
+  private async validateNoActiveContractOverlap(
+    jugadorId: number,
+    fechaInicio: string,
+    excludeId?: number,
+  ): Promise<void> {
+    const activeContracts =
+      await this.customRepository.findActiveContractsByJugador(
+        jugadorId,
+        excludeId,
+      );
+
+    for (const activeContract of activeContracts) {
+      if (!activeContract.fechaFin) {
+        throw new ConflictException(
+          'El jugador tiene un contrato activo sin fecha de finalización',
+        );
+      }
+
+      if (fechaInicio <= activeContract.fechaFin) {
+        throw new ConflictException(
+          `La fecha de inicio debe ser superior a ${activeContract.fechaFin}, que es la finalización del contrato activo`,
+        );
+      }
+    }
   }
 
   private validateDates(fechaInicio: string, fechaFin?: string | null): void {

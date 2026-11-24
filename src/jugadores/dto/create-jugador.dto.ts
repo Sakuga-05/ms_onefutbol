@@ -11,19 +11,19 @@ export class CreateJugadorDto {
   @MaxLength(100)
   apellidos!: string;
 
-  @IsOptional()
   @IsString()
+  @IsNotEmpty()
   @MaxLength(30)
-  identificacion?: string;
+  identificacion!: string;
 
   @IsInt()
   @IsPositive()
   numeroCamiseta!: number;
 
-  @IsOptional()
   @IsString()
+  @IsNotEmpty()
   @MaxLength(50)
-  nacionalidad?: string;
+  nacionalidad!: string;
 
   @IsOptional()
   @IsBoolean()

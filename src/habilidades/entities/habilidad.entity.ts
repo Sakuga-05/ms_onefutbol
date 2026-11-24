@@ -9,8 +9,8 @@ export class Habilidad {
   @Column({ length: 100, unique: true })
   nombre!: string;
 
-  @Column({ type: 'text', nullable: true })
-  descripcion!: string | null;
+  @Column({ type: 'text', nullable: false })
+  descripcion!: string;
 
   @Column({ type: 'boolean', default: true })
   activa!: boolean;

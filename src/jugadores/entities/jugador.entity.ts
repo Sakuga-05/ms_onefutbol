@@ -20,14 +20,14 @@ export class Jugador {
   @Column({ length: 100 })
   apellidos!: string;
 
-  @Column({ type: 'varchar', length: 30, unique: true, nullable: true })
-  identificacion?: string | null;
+  @Column({ type: 'varchar', length: 30, unique: true })
+  identificacion!: string;
 
   @Column({ name: 'numero_camiseta', type: 'int' })
   numeroCamiseta!: number;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  nacionalidad?: string | null;
+  @Column({ type: 'varchar', length: 50 })
+  nacionalidad!: string;
 
   @Column({ type: 'boolean', default: true })
   activo!: boolean;

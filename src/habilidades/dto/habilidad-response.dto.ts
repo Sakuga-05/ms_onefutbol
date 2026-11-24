@@ -1,6 +1,6 @@
 export class HabilidadResponseDto {
   id!: number;
   nombre!: string;
-  descripcion!: string | null;
+  descripcion!: string;
   activa!: boolean;
 }

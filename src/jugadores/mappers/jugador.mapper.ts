@@ -8,18 +8,18 @@ export class JugadorMapper {
     return {
       nombres: dto.nombres.trim(),
       apellidos: dto.apellidos.trim(),
-      identificacion: dto.identificacion?.trim() ?? null,
+      identificacion: dto.identificacion.trim(),
       numeroCamiseta: dto.numeroCamiseta,
-      nacionalidad: dto.nacionalidad?.trim() ?? null,
+      nacionalidad: dto.nacionalidad.trim(),
       activo: dto.activo ?? true,
     };
   }
   static mergeEntity(entity: Jugador, dto: UpdateJugadorDto): Jugador {
     if (dto.nombres !== undefined) entity.nombres = dto.nombres.trim();
     if (dto.apellidos !== undefined) entity.apellidos = dto.apellidos.trim();
-    if (dto.identificacion !== undefined) entity.identificacion = dto.identificacion ? dto.identificacion.trim() : null;
+    if (dto.identificacion !== undefined) entity.identificacion = dto.identificacion.trim();
     if (dto.numeroCamiseta !== undefined) entity.numeroCamiseta = dto.numeroCamiseta;
-    if (dto.nacionalidad !== undefined) entity.nacionalidad = dto.nacionalidad ? dto.nacionalidad.trim() : null;
+    if (dto.nacionalidad !== undefined) entity.nacionalidad = dto.nacionalidad.trim();
     if (dto.activo !== undefined) entity.activo = dto.activo;
     return entity;
   }
@@ -28,9 +28,9 @@ export class JugadorMapper {
       id: entity.id,
       nombres: entity.nombres,
       apellidos: entity.apellidos,
-      identificacion: entity.identificacion ?? null,
+      identificacion: entity.identificacion,
       numeroCamiseta: entity.numeroCamiseta,
-      nacionalidad: entity.nacionalidad ?? null,
+      nacionalidad: entity.nacionalidad,
       activo: entity.activo,
     };
   }

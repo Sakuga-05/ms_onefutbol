@@ -4,11 +4,11 @@ import { UpdateHabilidadDto } from '../dto/update-habilidad.dto';
 import { Habilidad } from '../entities/habilidad.entity';
 export class HabilidadMapper {
   static toEntity(dto: CreateHabilidadDto): Partial<Habilidad> {
-    return { nombre: dto.nombre.trim(), descripcion: dto.descripcion?.trim() ?? null, activa: dto.activa ?? true };
+    return { nombre: dto.nombre.trim(), descripcion: dto.descripcion.trim(), activa: dto.activa ?? true };
   }
   static mergeEntity(entity: Habilidad, dto: UpdateHabilidadDto): Habilidad {
     if (dto.nombre !== undefined) entity.nombre = dto.nombre.trim();
-    if (dto.descripcion !== undefined) entity.descripcion = dto.descripcion ? dto.descripcion.trim() : null;
+    if (dto.descripcion !== undefined) entity.descripcion = dto.descripcion.trim();
     if (dto.activa !== undefined) entity.activa = dto.activa;
     return entity;
   }
